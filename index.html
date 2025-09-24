@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dandiya Night Matchmaker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(to bottom right, #8b0000, #ff4500); /* Deeper festive gradient */
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 2.5rem;
+            background-color: #fff;
+            border-radius: 2rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); /* More pronounced shadow */
+            border: 5px solid #ffcc00; /* Golden border */
+        }
+        .message-box {
+            padding: 1rem;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .submit-button {
+            background-image: linear-gradient(to right, #ffcc00, #ff8c00); /* Golden to Orange gradient */
+            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+            box-shadow: 0 5px 15px rgba(255, 140, 0, 0.4);
+        }
+        .submit-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255, 140, 0, 0.6);
+        }
+        .festive-title {
+            font-family: 'Dancing Script', cursive;
+            text-shadow: 3px 3px 5px rgba(0,0,0,0.3);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center">
+
+    <div class="container text-center">
+        <h1 class="text-6xl festive-title text-red-800 mb-2 drop-shadow-lg">Dandiya Night Matchmaker</h1>
+        <p class="text-xl text-gray-700 mb-10">Find your perfect partner for a memorable night!</p>
+
+        <!-- Loading Spinner -->
+        <div id="loading-spinner" class="hidden flex justify-center items-center h-20">
+            <svg class="animate-spin h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+        </div>
+
+        <!-- User ID Display -->
+        <div id="user-info" class="text-xs text-gray-400 mb-4 hidden">
+            <p>Your User ID: <span id="user-id" class="font-mono text-gray-500"></span></p>
+        </div>
+
+        <!-- Message Box -->
+        <div id="message-box" class="hidden message-box"></div>
+
+        <!-- Registration/Profile Form -->
+        <div id="form-container">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Tell Us About Yourself</h2>
+            <form id="profile-form" class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left">
+                <div>
+                    <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+                    <input type="text" id="name" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3">
+                </div>
+                <div>
+                    <label for="gender" class="block text-sm font-medium text-gray-700">Gender</label>
+                    <select id="gender" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3">
+                        <option value="">Select your gender</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="branch" class="block text-sm font-medium text-gray-700">Branch</label>
+                    <input type="text" id="branch" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3">
+                </div>
+                <div>
+                    <label for="rollNo" class="block text-sm font-medium text-gray-700">Roll No.</label>
+                    <input type="text" id="rollNo" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3">
+                </div>
+                <div>
+                    <label for="year" class="block text-sm font-medium text-gray-700">Your College Year</label>
+                    <select id="year" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3">
+                        <option value="">Select your year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="interests" class="block text-sm font-medium text-gray-700">Interests (comma separated)</label>
+                    <textarea id="interests" rows="2" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3"></textarea>
+                </div>
+                 <div>
+                    <label for="hobbies" class="block text-sm font-medium text-gray-700">Hobbies (comma separated)</label>
+                    <textarea id="hobbies" rows="2" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3"></textarea>
+                </div>
+                <div>
+                    <label for="favoriteSong" class="block text-sm font-medium text-gray-700">Favorite Dandiya Song/Artist</label>
+                    <input type="text" id="favoriteSong" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3">
+                </div>
+                <div>
+                    <label for="chaiOrCoffee" class="block text-sm font-medium text-gray-700">Chai or coffee?</label>
+                    <select id="chaiOrCoffee" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3">
+                        <option value="">Select your answer</option>
+                        <option value="chai">Chai</option>
+                        <option value="coffee">Coffee</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="lateNightSnack" class="block text-sm font-medium text-gray-700">Your go-to late-night snack?</label>
+                    <input type="text" id="lateNightSnack" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3">
+                </div>
+                <div>
+                    <label for="instagramHandle" class="block text-sm font-medium text-gray-700">Instagram Handle</label>
+                    <input type="text" id="instagramHandle" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3">
+                </div>
+                <div>
+                    <label for="partnerYear" class="block text-sm font-medium text-gray-700">Preferred Partner's Year</label>
+                    <select id="partnerYear" required class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-red-500 focus:ring-red-500 transition duration-150 ease-in-out p-3">
+                        <option value="">Select preference</option>
+                        <option value="batchmate">Batchmate</option>
+                        <option value="junior">Junior</option>
+                        <option value="senior">Senior</option>
+                        <option value="any">Any Year</option>
+                    </select>
+                </div>
+                <button type="submit" class="submit-button w-full flex justify-center py-3 px-6 rounded-xl font-bold text-white uppercase tracking-wide col-span-1 md:col-span-2">
+                    Save Details & Find a Match
+                </button>
+            </form>
+        </div>
+
+        <!-- Matches Section -->
+        <div id="matches-container" class="hidden">
+            <h2 class="text-3xl font-semibold text-gray-800 mb-6">Matchmaking Status</h2>
+            <div id="match-results" class="space-y-4">
+                <p class="text-gray-700">Your details have been saved successfully. Your match will be provided by the organizers at the event!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, setPersistence, browserSessionPersistence } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, where, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables provided by the environment
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // UI Elements
+        const loadingSpinner = document.getElementById('loading-spinner');
+        const formContainer = document.getElementById('form-container');
+        const profileForm = document.getElementById('profile-form');
+        const matchesContainer = document.getElementById('matches-container');
+        const userIdSpan = document.getElementById('user-id');
+        const userInfoDiv = document.getElementById('user-info');
+        const messageBox = document.getElementById('message-box');
+
+        // State
+        let db;
+        let auth;
+        let currentUserId = null;
+        let userProfileData = null;
+
+        function showMessage(message, type) {
+            messageBox.textContent = message;
+            messageBox.className = `message-box ${type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} block`;
+        }
+
+        function showLoading(show) {
+            loadingSpinner.classList.toggle('hidden', !show);
+            formContainer.classList.toggle('hidden', show);
+            matchesContainer.classList.toggle('hidden', show);
+        }
+
+        // Initialize Firebase and Authentication
+        async function initializeFirebase() {
+            try {
+                if (Object.keys(firebaseConfig).length === 0) {
+                    throw new Error("Firebase config not available. Please check the environment settings.");
+                }
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                await setPersistence(auth, browserSessionPersistence);
+
+                onAuthStateChanged(auth, async (user) => {
+                    showLoading(true);
+                    if (user) {
+                        currentUserId = user.uid;
+                        userIdSpan.textContent = currentUserId;
+                        userInfoDiv.classList.remove('hidden');
+
+                        const userDocRef = doc(db, `/artifacts/${appId}/public/data/users`, currentUserId);
+                        const userDocSnap = await getDoc(userDocRef);
+
+                        if (userDocSnap.exists()) {
+                            userProfileData = userDocSnap.data();
+                            await checkMatchStatus();
+                        } else {
+                            renderForm();
+                        }
+                    } else {
+                        try {
+                            if (initialAuthToken) {
+                                await signInWithCustomToken(auth, initialAuthToken);
+                            } else {
+                                await signInAnonymously(auth);
+                            }
+                        } catch (error) {
+                            showMessage(`Authentication failed: ${error.message}`, 'error');
+                        }
+                    }
+                    showLoading(false);
+                });
+            } catch (error) {
+                console.error("Firebase initialization failed:", error);
+                showMessage(`Initialization error: ${error.message}`, 'error');
+                showLoading(false);
+            }
+        }
+
+        function renderForm() {
+            formContainer.classList.remove('hidden');
+            matchesContainer.classList.add('hidden');
+        }
+
+        async function checkMatchStatus() {
+            showLoading(true);
+            try {
+                // Check if user is already matched
+                const matchesCollectionRef = collection(db, `/artifacts/${appId}/public/data/matches`);
+                const q1 = query(matchesCollectionRef, where("user1Id", "==", currentUserId));
+                const q2 = query(matchesCollectionRef, where("user2Id", "==", currentUserId));
+                
+                const [match1, match2] = await Promise.all([getDocs(q1), getDocs(q2)]);
+                
+                if (!match1.empty || !match2.empty) {
+                    formContainer.classList.add('hidden');
+                    matchesContainer.classList.remove('hidden');
+                } else {
+                    renderForm();
+                }
+
+            } catch (error) {
+                console.error("Error checking match status:", error);
+                showMessage(`Failed to check match status: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function findCommonWords(str1, str2) {
+            const set1 = new Set(str1.toLowerCase().split(/[,\s]+/));
+            const set2 = new Set(str2.toLowerCase().split(/[,\s]+/));
+            let commonCount = 0;
+            set1.forEach(word => {
+                if (set2.has(word) && word.trim() !== '') {
+                    commonCount++;
+                }
+            });
+            return commonCount;
+        }
+
+        async function findAndSaveMatch() {
+            showLoading(true);
+
+            try {
+                const usersCollectionRef = collection(db, `/artifacts/${appId}/public/data/users`);
+                const usersQuerySnapshot = await getDocs(usersCollectionRef);
+
+                const potentialMatches = [];
+                const currentUserYear = parseInt(userProfileData.year);
+                const preferredYear = userProfileData.partnerYear;
+
+                const matchesCollectionRef = collection(db, `/artifacts/${appId}/public/data/matches`);
+                const existingMatchesSnapshot = await getDocs(matchesCollectionRef);
+                const matchedUserIds = new Set();
+                existingMatchesSnapshot.forEach(doc => {
+                    const matchData = doc.data();
+                    matchedUserIds.add(matchData.user1Id);
+                    matchedUserIds.add(matchData.user2Id);
+                });
+
+                if (matchedUserIds.has(currentUserId)) {
+                    showMessage('You have already been matched!', 'warning');
+                    return;
+                }
+
+                usersQuerySnapshot.forEach((doc) => {
+                    const matchUser = doc.data();
+                    if (doc.id === currentUserId || matchedUserIds.has(doc.id)) {
+                        return;
+                    }
+
+                    const matchUserYear = parseInt(matchUser.year);
+                    let yearMatch = false;
+
+                    if (preferredYear === 'any') {
+                        yearMatch = true;
+                    } else if (preferredYear === 'batchmate' && matchUserYear === currentUserYear) {
+                        yearMatch = true;
+                    } else if (preferredYear === 'senior' && matchUserYear > currentUserYear) {
+                        yearMatch = true;
+                    } else if (preferredYear === 'junior' && matchUserYear < currentUserYear) {
+                        yearMatch = true;
+                    }
+
+                    if (yearMatch && userProfileData.gender !== matchUser.gender) {
+                        const userInterestsString = `${userProfileData.interests},${userProfileData.hobbies},${userProfileData.favoriteSong},${userProfileData.chaiOrCoffee},${userProfileData.lateNightSnack},${userProfileData.instagramHandle},${userProfileData.rollNo}`;
+                        const matchInterestsString = `${matchUser.interests},${matchUser.hobbies},${matchUser.favoriteSong},${matchUser.chaiOrCoffee},${matchUser.lateNightSnack},${matchUser.instagramHandle},${matchUser.rollNo}`;
+                        const score = findCommonWords(userInterestsString, matchInterestsString);
+                        
+                        if (score > 0) {
+                            potentialMatches.push({ ...matchUser, id: doc.id, score });
+                        }
+                    }
+                });
+
+                potentialMatches.sort((a, b) => b.score - a.score);
+
+                if (potentialMatches.length > 0) {
+                    const bestMatch = potentialMatches[0];
+                    
+                    // Save the match privately to the database
+                    await addDoc(matchesCollectionRef, {
+                        user1Id: currentUserId,
+                        user2Id: bestMatch.id,
+                        matchScore: bestMatch.score,
+                        matchedAt: new Date().toISOString()
+                    });
+                    
+                    showMessage('Your details have been saved. Your match has been found and will be revealed by the organizers.', 'success');
+                } else {
+                    showMessage('Thank you for registering! We are still looking for a perfect match for you.', 'success');
+                }
+
+            } catch (error) {
+                console.error("Error finding and saving match:", error);
+                showMessage(`Failed to process match: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        profileForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading(true);
+            const name = document.getElementById('name').value;
+            const gender = document.getElementById('gender').value;
+            const branch = document.getElementById('branch').value;
+            const rollNo = document.getElementById('rollNo').value;
+            const year = document.getElementById('year').value;
+            const interests = document.getElementById('interests').value;
+            const hobbies = document.getElementById('hobbies').value;
+            const favoriteSong = document.getElementById('favoriteSong').value;
+            const chaiOrCoffee = document.getElementById('chaiOrCoffee').value;
+            const lateNightSnack = document.getElementById('lateNightSnack').value;
+            const instagramHandle = document.getElementById('instagramHandle').value;
+            const partnerYear = document.getElementById('partnerYear').value;
+
+            userProfileData = {
+                name,
+                gender,
+                branch,
+                rollNo,
+                year,
+                interests,
+                hobbies,
+                favoriteSong,
+                chaiOrCoffee,
+                lateNightSnack,
+                instagramHandle,
+                partnerYear,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                const userDocRef = doc(db, `/artifacts/${appId}/public/data/users`, currentUserId);
+                await setDoc(userDocRef, userProfileData);
+                await findAndSaveMatch();
+                checkMatchStatus();
+            } catch (error) {
+                console.error("Error saving profile:", error);
+                showMessage(`Failed to save profile: ${error.message}`, 'error');
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Initialize the application
+        initializeFirebase();
+    </script>
+</body>
+</html>
