@@ -162,9 +162,16 @@
         import { getFirestore, doc, setDoc, getDoc, collection, query, getDocs, where, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Global variables provided by the environment
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        const firebaseConfig = {
+  apiKey: "AIzaSyD62icDiZdViD7LvLJGL0GzVLgr0puVJIo",
+  authDomain: "dandiyamingle.firebaseapp.com",
+  projectId: "dandiyamingle",
+  storageBucket: "dandiyamingle.firebasestorage.app",
+  messagingSenderId: "314051455658",
+  appId: "1:314051455658:web:cae15857f1bb037e4cfed3"
+};
+        const appId = firebaseConfig.appId;
+const initialAuthToken = null;
 
         // UI Elements
         const loadingSpinner = document.getElementById('loading-spinner');
