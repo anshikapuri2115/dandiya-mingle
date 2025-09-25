@@ -180,27 +180,19 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection, query, getDocs, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection, query, where, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         setLogLevel('debug');
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-          apiKey: "AIzaSyB...",
-          authDomain: "dandiya-app-123.firebaseapp.com",
-          projectId: "dandiya-app-123",
-          storageBucket: "dandiya-app-123.appspot.com",
-          messagingSenderId: "1234567890",
-          appId: "1:1234567890:web:a1b2c3d4e5f6g7h8"
-        };
-        const appId = firebaseConfig.appId;
-        const initialAuthToken = null;
-
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+        
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth(app);
+        let app = null;
+        let db = null;
+        let auth = null;
         let userId;
         let currentUserProfile = null;
 
@@ -270,66 +262,79 @@
         }
 
         // --- Main Application Logic ---
+        
+        const initializeAndAuth = async () => {
+             // Handle cases where firebaseConfig might not be available
+            if (!firebaseConfig) {
+                showMessage("Firebase configuration is missing. Please check your settings.", "error");
+                return;
+            }
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const isAdminView = urlParams.get('admin') === 'true';
+            app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
 
-        if (isAdminView) {
-            loginContainer.classList.remove('hidden');
-            appContainer.classList.add('hidden');
-            profileForm.classList.add('hidden');
-            matchesTitle.textContent = "All Profiles";
-            adminControls.classList.remove('hidden');
-            matchesList.innerHTML = '<p class="text-center text-gray-500">Please log in to view profiles.</p>';
+            try {
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                userId = auth.currentUser.uid;
+                userInfoSpan.textContent = `Your User ID: ${userId}`;
+                
+                const urlParams = new URLSearchParams(window.location.search);
+                const isAdminView = urlParams.get('admin') === 'true';
 
-            loginButton.addEventListener('click', () => {
-                if (adminPasswordInput.value === ADMIN_PASSWORD) {
+                if (isAdminView) {
+                    loginContainer.classList.remove('hidden');
+                    appContainer.classList.add('hidden');
+                    matchesTitle.textContent = "All Profiles";
+                    adminControls.classList.remove('hidden');
+                    matchesList.innerHTML = '<p class="text-center text-gray-500">Please log in to view profiles.</p>';
+
+                    loginButton.addEventListener('click', () => {
+                        if (adminPasswordInput.value === ADMIN_PASSWORD) {
+                            loginContainer.classList.add('hidden');
+                            appContainer.classList.remove('hidden');
+                            startAdminApp();
+                        } else {
+                            loginMessage.textContent = 'Incorrect password. Please try again.';
+                        }
+                    });
+                } else {
                     loginContainer.classList.add('hidden');
                     appContainer.classList.remove('hidden');
-                    profileForm.classList.remove('hidden');
-                    startAdminApp();
-                } else {
-                    loginMessage.textContent = 'Incorrect password. Please try again.';
+                    startPublicApp();
                 }
-            });
-        } else {
-            loginContainer.classList.add('hidden');
-            appContainer.classList.remove('hidden');
-            startPublicApp();
-        }
 
-        function startPublicApp() {
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    userInfoSpan.textContent = `Your User ID: ${userId}`;
-                    const userDocRef = doc(db, `/artifacts/${appId}/public/data/profiles`, userId);
-                    const userDocSnap = await getDoc(userDocRef);
-                    if (userDocSnap.exists()) {
-                        currentUserProfile = userDocSnap.data();
-                        document.getElementById('name').value = currentUserProfile.name || '';
-                        document.getElementById('gender').value = currentUserProfile.gender || '';
-                        document.getElementById('branch').value = currentUserProfile.branch || '';
-                        document.getElementById('rollNo').value = currentUserProfile.rollNo || '';
-                        document.getElementById('collegeYear').value = currentUserProfile.collegeYear || '';
-                        document.getElementById('interests').value = currentUserProfile.interests || '';
-                        document.getElementById('hobbies').value = currentUserProfile.hobbies || '';
-                        document.getElementById('favoriteDandiyaSong').value = currentUserProfile.favoriteDandiyaSong || '';
-                        document.getElementById('chaiOrCoffee').value = currentUserProfile.chaiOrCoffee || '';
-                        document.getElementById('lateNightSnack').value = currentUserProfile.lateNightSnack || '';
-                        startRealtimeMatchesListener(currentUserProfile.favoriteDandiyaSong, false);
-                    } else {
-                        console.log("No existing profile found. Create one!");
-                        matchesList.innerHTML = '<p class="text-center text-gray-500">Submit your profile to see your matches here!</p>';
-                    }
-                } else {
-                    signInAnonymously(auth).catch((error) => {
-                        console.error("Anonymous sign-in failed: ", error);
-                        showMessage("Authentication failed. Please check your Firebase settings.", "error");
-                    });
-                }
-            });
+            } catch (error) {
+                console.error("Authentication failed: ", error);
+                showMessage("Authentication failed. Please check your Firebase settings.", "error");
+            }
+        };
 
+        const startPublicApp = async () => {
+            const userDocRef = doc(db, `/artifacts/${appId}/public/data/profiles`, userId);
+            const userDocSnap = await getDoc(userDocRef);
+            if (userDocSnap.exists()) {
+                currentUserProfile = userDocSnap.data();
+                document.getElementById('name').value = currentUserProfile.name || '';
+                document.getElementById('gender').value = currentUserProfile.gender || '';
+                document.getElementById('branch').value = currentUserProfile.branch || '';
+                document.getElementById('rollNo').value = currentUserProfile.rollNo || '';
+                document.getElementById('collegeYear').value = currentUserProfile.collegeYear || '';
+                document.getElementById('interests').value = currentUserProfile.interests || '';
+                document.getElementById('hobbies').value = currentUserProfile.hobbies || '';
+                document.getElementById('favoriteDandiyaSong').value = currentUserProfile.favoriteDandiyaSong || '';
+                document.getElementById('chaiOrCoffee').value = currentUserProfile.chaiOrCoffee || '';
+                document.getElementById('lateNightSnack').value = currentUserProfile.lateNightSnack || '';
+                startRealtimeMatchesListener(currentUserProfile.favoriteDandiyaSong, false);
+            } else {
+                console.log("No existing profile found. Create one!");
+                matchesList.innerHTML = '<p class="text-center text-gray-500">Submit your profile to see your matches here!</p>';
+            }
+            
             profileForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 if (!userId) {
@@ -366,24 +371,14 @@
             });
         }
 
-        function startAdminApp() {
-             auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    userId = user.uid;
-                    userInfoSpan.textContent = `Your User ID: ${userId}`;
-                    const q = query(collection(db, `/artifacts/${appId}/public/data/profiles`));
-                    onSnapshot(q, (querySnapshot) => {
-                        const profiles = [];
-                        querySnapshot.forEach((doc) => {
-                            profiles.push(doc.data());
-                        });
-                        renderMatches(profiles, true);
-                    });
-                } else {
-                    signInAnonymously(auth).catch((error) => {
-                        console.error("Anonymous sign-in failed: ", error);
-                    });
-                }
+        const startAdminApp = async () => {
+            const q = query(collection(db, `/artifacts/${appId}/public/data/profiles`));
+            onSnapshot(q, (querySnapshot) => {
+                const profiles = [];
+                querySnapshot.forEach((doc) => {
+                    profiles.push(doc.data());
+                });
+                renderMatches(profiles, true);
             });
             // Admin filter functionality
             adminFilterButton.addEventListener('click', () => {
@@ -415,6 +410,8 @@
                 renderMatches(profiles, isAdmin);
             });
         }
+        
+        initializeAndAuth();
     </script>
 </body>
 </html>
