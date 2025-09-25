@@ -151,6 +151,13 @@
                             <input type="text" id="lateNightSnack" class="form-input">
                         </div>
                     </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="instagramHandle" class="block text-sm font-medium text-gray-700">Instagram Handle</label>
+                            <input type="text" id="instagramHandle" class="form-input">
+                        </div>
+                    </div>
 
                     <button type="submit" class="w-full bg-pink-500 text-white font-bold py-3 rounded-xl hover:bg-pink-600 transition-colors">
                         Save My Profile
@@ -215,6 +222,7 @@
         const adminFilterButton = document.getElementById('admin-filter-button');
         const adminSongFilterInput = document.getElementById('admin-song-filter');
         const formSubmitButton = profileForm.querySelector('button');
+        const instagramHandleInput = document.getElementById('instagramHandle');
 
         // Helper functions
         function showMessage(message, type) {
@@ -254,6 +262,7 @@
                         <p><strong>Favorite Song:</strong> ${profile.favoriteDandiyaSong}</p>
                         <p><strong>Chai or Coffee:</strong> ${profile.chaiOrCoffee}</p>
                         <p><strong>Late Night Snack:</strong> ${profile.lateNightSnack}</p>
+                        <p><strong>Instagram Handle:</strong> ${profile.instagramHandle || 'N/A'}</p>
                     `;
                 }
                 profileCard.innerHTML = cardHtml;
@@ -329,6 +338,7 @@
                 document.getElementById('favoriteDandiyaSong').value = currentUserProfile.favoriteDandiyaSong || '';
                 document.getElementById('chaiOrCoffee').value = currentUserProfile.chaiOrCoffee || '';
                 document.getElementById('lateNightSnack').value = currentUserProfile.lateNightSnack || '';
+                document.getElementById('instagramHandle').value = currentUserProfile.instagramHandle || '';
                 startRealtimeMatchesListener(currentUserProfile.favoriteDandiyaSong, false);
             } else {
                 console.log("No existing profile found. Create one!");
@@ -354,6 +364,7 @@
                     favoriteDandiyaSong: document.getElementById('favoriteDandiyaSong').value,
                     chaiOrCoffee: document.getElementById('chaiOrCoffee').value,
                     lateNightSnack: document.getElementById('lateNightSnack').value,
+                    instagramHandle: document.getElementById('instagramHandle').value,
                     timestamp: new Date()
                 };
                 const docRef = doc(db, `/artifacts/${appId}/public/data/profiles`, userId);
@@ -415,3 +426,4 @@
     </script>
 </body>
 </html>
+
